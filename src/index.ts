@@ -1,4 +1,4 @@
-import { build } from 'esbuild'
+import { build, BuildOptions } from 'esbuild'
 import { join } from 'path'
 import { Plugin } from 'vite'
 
@@ -8,11 +8,12 @@ export interface FigmaOptions {
   editorType: ('figma' | 'figjam')[]
   api: string
   main: string
+  esbuild?: BuildOptions
 }
 
 const config = { root: '', outDir: '' }
 
-export function figma({ main, api, id, name, editorType }: FigmaOptions): Plugin {
+export function figma({ main, api, id, name, editorType, esbuild }: FigmaOptions): Plugin {
   return {
     name: 'vite-plugin-figma',
     apply: 'build',
@@ -25,7 +26,7 @@ export function figma({ main, api, id, name, editorType }: FigmaOptions): Plugin
       async handler() {
         // Generate Main
         const entry = join(config.root, main)
-        const result = await build({ entryPoints: [entry], target: 'ES2015', bundle: true, write: false }).catch(() => process.exit(1))
+        const result = await build({ ...esbuild, entryPoints: [entry], target: 'ES2015', bundle: true, write: false, sourcemap: 'inline' }).catch(() => process.exit(1))
         this.emitFile({ type: 'asset', fileName: 'main.js', name: 'main', source: result.outputFiles[0].text })
 
         // Generate Manifest
