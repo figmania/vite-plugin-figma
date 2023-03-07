@@ -1,6 +1,7 @@
 import { build } from 'esbuild'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
+import { dim, green } from 'picocolors'
 import { Plugin, ResolvedConfig } from 'vite'
 import { viteSingleFile } from 'vite-plugin-singlefile'
 
@@ -36,7 +37,17 @@ async function buildMain(options: FigmaOptions, config: ResolvedConfig): Promise
     write: false,
     sourcemap: config.mode === 'production' ? false : 'inline',
     minify: config.mode === 'production',
-    legalComments: 'none'
+    legalComments: 'none',
+    watch: config.command === 'serve' ? {
+      onRebuild(error) {
+        const outFile = join(config.build.outDir, 'main.js')
+        if (error) {
+          // config.logger.error(error.message, { clear: false, timestamp: true })
+        } else {
+          config.logger.info(`${green(`hmr update`)} ${dim(`/${outFile}`)}`, { clear: false, timestamp: true })
+        }
+      }
+    } : false
   }).catch(() => process.exit(1))
   return result.outputFiles[0].text
 }
@@ -49,7 +60,7 @@ export function figma(command: 'build' | 'serve', options: FigmaOptions): Plugin
   const config = {} as ResolvedConfig
   return [{
     name: 'vite-plugin-figma',
-    config(cfg, env) {
+    config(_, env) {
       return {
         build: {
           minify: env.mode !== 'production',
