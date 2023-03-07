@@ -4,12 +4,15 @@ import { join } from 'path'
 import { Plugin, ResolvedConfig } from 'vite'
 import { viteSingleFile } from 'vite-plugin-singlefile'
 
+export type FigmaPermissionType = 'currentuser' | 'activeusers' | 'fileusers' | 'payments'
+
 export interface FigmaOptions {
   name: string
   id: string
   editorType: ('figma' | 'figjam')[]
   api: string
   main: string
+  permissions?: FigmaPermissionType[]
 }
 
 const buildDevHtml = (html: string, config: ResolvedConfig) => html.replace('</head>', `
@@ -38,8 +41,8 @@ async function buildMain(options: FigmaOptions, config: ResolvedConfig): Promise
   return result.outputFiles[0].text
 }
 
-function buildManifest({ name, id, editorType, api }: FigmaOptions): string {
-  return JSON.stringify({ name, id, editorType, api, ui: 'index.html', main: 'main.js' }, null, 2)
+function buildManifest({ name, id, editorType, api, permissions }: FigmaOptions): string {
+  return JSON.stringify({ name, id, editorType, api, ui: 'index.html', main: 'main.js', permissions }, null, 2)
 }
 
 export function figma(command: 'build' | 'serve', options: FigmaOptions): Plugin[] {
