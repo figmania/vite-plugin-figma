@@ -1,9 +1,8 @@
-import { build } from 'esbuild'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
-import { dim, green } from 'picocolors'
 import { Plugin, ResolvedConfig } from 'vite'
 import { viteSingleFile } from 'vite-plugin-singlefile'
+import { buildMain } from './buildMain'
 
 export type FigmaPermissionType = 'currentuser' | 'activeusers' | 'fileusers' | 'payments'
 
@@ -28,29 +27,7 @@ const buildDevHtml = (html: string, config: ResolvedConfig) => html.replace('</h
     <script type="module" src="/@vite/client"></script>
   </head>`)
 
-async function buildMain(options: FigmaOptions, config: ResolvedConfig): Promise<string> {
-  const entry = join(config.root, options.main)
-  const result = await build({
-    entryPoints: [entry],
-    target: 'ES2015',
-    bundle: true,
-    write: false,
-    sourcemap: config.mode === 'production' ? false : 'inline',
-    minify: config.mode === 'production',
-    legalComments: 'none',
-    watch: config.command === 'serve' ? {
-      onRebuild(error) {
-        const outFile = join(config.build.outDir, 'main.js')
-        if (error) {
-          // config.logger.error(error.message, { clear: false, timestamp: true })
-        } else {
-          config.logger.info(`${green(`hmr update`)} ${dim(`/${outFile}`)}`, { clear: false, timestamp: true })
-        }
-      }
-    } : false
-  }).catch(() => process.exit(1))
-  return result.outputFiles[0].text
-}
+
 
 function buildManifest({ name, id, editorType, api, permissions }: FigmaOptions): string {
   return JSON.stringify({ name, id, editorType, api, ui: 'index.html', main: 'main.js', permissions }, null, 2)
@@ -78,7 +55,9 @@ export function figma(command: 'build' | 'serve', options: FigmaOptions): Plugin
       if (!existsSync(config.build.outDir)) { mkdirSync(config.build.outDir) }
       const html = readFileSync(join(config.root, 'index.html'), 'utf8')
       writeFileSync(join(config.build.outDir, 'index.html'), buildDevHtml(html, config), 'utf-8')
-      writeFileSync(join(config.build.outDir, 'main.js'), await buildMain(options, config), 'utf-8')
+      await buildMain(options, config, (result) => {
+        writeFileSync(join(config.build.outDir, 'main.js'), result, 'utf-8')
+      })
       writeFileSync(join(config.build.outDir, 'manifest.json'), buildManifest(options), 'utf-8')
     },
     generateBundle: {
