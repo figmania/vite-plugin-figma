@@ -34,8 +34,8 @@ const buildDevHtml = (html: string, config: ResolvedConfig) => html.replace('</h
 
 
 
-function buildManifest({ name, id, editorType, api, permissions }: FigmaOptions): string {
-  return JSON.stringify({ name, id, editorType, api, ui: 'index.html', main: 'main.js', permissions }, null, 2)
+function buildManifest({ name, id, editorType, api, permissions, networkAccess }: FigmaOptions): string {
+  return JSON.stringify({ name, id, editorType, api, ui: 'index.html', main: 'main.js', permissions, networkAccess }, null, 2)
 }
 
 export function figma(command: 'build' | 'serve', options: FigmaOptions): Plugin[] {
