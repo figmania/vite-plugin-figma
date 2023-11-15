@@ -12,7 +12,12 @@ export interface FigmaOptions {
   editorType: ('figma' | 'figjam')[]
   api: string
   main: string
-  permissions?: FigmaPermissionType[]
+  permissions?: FigmaPermissionType[],
+  networkAccess: {
+    allowedDomains: string[],
+    devAllowedDomains?: string[],
+    reasoning?: string
+  }
 }
 
 const buildDevHtml = (html: string, config: ResolvedConfig) => html.replace('</head>', `
