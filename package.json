@@ -1,6 +1,6 @@
 {
   "name": "@figmania/vite-plugin-figma",
-  "version": "2.4.2",
+  "version": "2.4.3",
   "description": "Figma Plugin Development Vite Plugin",
   "repository": "https://github.com/figmania/vite-plugin-figma.git",
   "main": "build/index.js",
