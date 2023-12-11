@@ -9,11 +9,13 @@ export type FigmaPermissionType = 'currentuser' | 'activeusers' | 'fileusers' | 
 export interface FigmaOptions {
   name: string
   id: string
-  editorType: ('figma' | 'figjam')[]
+  editorType: ('figma' | 'figjam' | 'dev')[]
   api: string
   main: string
+  capabilities?: ('textreview' | 'codegen' | 'inspect' | 'vscode')[]
+  codegenLanguages?: { label: string, value: string }[]
   permissions?: FigmaPermissionType[],
-  networkAccess: {
+  networkAccess?: {
     allowedDomains: string[],
     devAllowedDomains?: string[],
     reasoning?: string
@@ -34,8 +36,8 @@ const buildDevHtml = (html: string, config: ResolvedConfig) => html.replace('</h
 
 
 
-function buildManifest({ name, id, editorType, api, permissions, networkAccess }: FigmaOptions): string {
-  return JSON.stringify({ name, id, editorType, api, ui: 'index.html', main: 'main.js', permissions, networkAccess }, null, 2)
+function buildManifest(options: FigmaOptions): string {
+  return JSON.stringify({ ...options, ui: 'index.html', main: 'main.js' }, null, 2)
 }
 
 export function figma(command: 'build' | 'serve', options: FigmaOptions): Plugin[] {

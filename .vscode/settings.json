@@ -12,8 +12,8 @@
   "html.format.enable": false,
   "xml.format.enabled": false,
   "editor.codeActionsOnSave": {
-    "source.fixAll": true,
-    "source.organizeImports": true
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit"
   },
   "files.exclude": {
     "**/.git": true,
