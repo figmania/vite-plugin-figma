@@ -3,29 +3,25 @@ import { join } from 'path'
 import { Plugin, ResolvedConfig } from 'vite'
 import { viteSingleFile } from 'vite-plugin-singlefile'
 import { buildMain } from './buildMain'
-
-export type FigmaPermissionType = 'currentuser' | 'activeusers' | 'fileusers' | 'payments'
+import { CodeLanguage, CodegenPreference, EditorType, NetworkAccess, PluginCapability, PluginPermissionType } from './types'
 
 export interface FigmaOptions {
   name: string
   id: string
-  editorType: ('figma' | 'figjam' | 'dev')[]
+  editorType: EditorType[]
   api: string
   main: string
-  capabilities?: ('textreview' | 'codegen' | 'inspect' | 'vscode')[]
-  codegenLanguages?: { label: string, value: string }[]
-  permissions?: FigmaPermissionType[],
-  networkAccess?: {
-    allowedDomains: string[],
-    devAllowedDomains?: string[],
-    reasoning?: string
-  }
+  capabilities?: PluginCapability[]
+  codegenLanguages?: CodeLanguage[]
+  codegenPreferences?: CodegenPreference[]
+  permissions?: PluginPermissionType[],
+  networkAccess?: NetworkAccess
 }
 
 const buildDevHtml = (html: string, config: ResolvedConfig) => html.replace('</head>', `
     <base href="http://${config.server.host}:${config.server.port}/">
     <script type="module">
-      import RefreshRuntime from "/@react-refresh"
+      import RefreshRuntime from '/@react-refresh'
       RefreshRuntime.injectIntoGlobalHook(window)
       window.$RefreshReg$ = () => {}
       window.$RefreshSig$ = () => (type) => type
@@ -33,8 +29,6 @@ const buildDevHtml = (html: string, config: ResolvedConfig) => html.replace('</h
     </script>
     <script type="module" src="/@vite/client"></script>
   </head>`)
-
-
 
 function buildManifest(options: FigmaOptions): string {
   return JSON.stringify({ ...options, ui: 'index.html', main: 'main.js' }, null, 2)
